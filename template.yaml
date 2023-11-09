@@ -21,7 +21,6 @@ spec:
           ui:autofocus: true
           ui:options:
             rows: 5
-      properties:
         broker_list:
           title: Broker List
           type: string
@@ -41,7 +40,6 @@ spec:
           ui:autofocus: true
           ui:options:
             rows: 5
-      properties:
         repoUrl:
           title: Repository Location
           type: string
