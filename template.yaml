@@ -30,16 +30,8 @@ spec:
             rows: 5
     - title: Choose a location
       required:
-        - repoName
         - repoUrl
       properties:
-        repoName:
-          title: Repository Name
-          type: string
-          description: Enter the Repository Name
-          ui:autofocus: true
-          ui:options:
-            rows: 5
         repoUrl:
           title: Repository Location
           type: string
@@ -73,4 +65,4 @@ spec:
       action: catalog:register
       input:
         repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: './node-consumer/catalog-info.yaml'
+        catalogInfoPath: '/node-consumer/catalog-info.yaml'
