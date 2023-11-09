@@ -1,0 +1,78 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+# https://backstage.io/docs/features/software-catalog/descriptor-format#kind-template
+kind: Template
+metadata:
+  name: consumer-app
+  title: Consumer App
+  description: A template for the scaffolder that creates a consumer service for a cluster.
+spec:
+  owner: raman.online.com
+  type: service
+  parameters:
+    - title: Enter Consumer Details
+      required:
+        - group_id
+        - broker_list
+      properties:
+        group_id:
+          title: Group-Id
+          type: string
+          description: Enter the Consumer Group-Id
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+      properties:
+        broker_list:
+          title: Broker List
+          type: string
+          description: Enter the Broker List
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+    - title: Choose a location
+      required:
+        - repoName
+        - repoUrl
+      properties:
+        repoName:
+          title: Repository Name
+          type: string
+          description: Enter the Repository Name
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+  steps:
+    # Each step executes an action, in this case one templates files into the working directory.
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./node-consumer/src
+        values:
+          group_id: ${{ parameters.group_id }}
+          broker_list: ${{ parameters.broker_list }}
+
+    # This step publishes the contents of the working directory to GitHub.
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: This is ${{ parameters.repoName }}
+        repoUrl: ${{ parameters.repoUrl }}
+
+    # The final step is to register our new component in the catalog.
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: './node-consumer/catalog-info.yaml'
