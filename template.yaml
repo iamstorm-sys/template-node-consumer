@@ -53,7 +53,7 @@ spec:
       name: Fetch Base
       action: fetch:template
       input:
-        url: ./content/node-consumer/src
+        url: ./content/node-consumer
         values:
           group_id: ${{ parameters.group_id }}
           broker_list: ${{ parameters.broker_list }}
