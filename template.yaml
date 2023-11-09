@@ -6,21 +6,29 @@ metadata:
   title: Consumer App
   description: A template for the scaffolder that creates a consumer service for a cluster.
 spec:
-  owner: raman.online.com
+  owner: user:guest
   type: service
   parameters:
     - title: Enter Consumer Details
       required:
+        - name
         - group_id
         - broker_list
       properties:
+        name:
+          title: Name
+          type: string
+          description: Unique name for the component
+          ui:autofocus: true
+          ui:options:
+            rows: 5
         group_id:
           title: Group-Id
           type: string
           description: Enter the Consumer Group-Id
           ui:autofocus: true
           ui:options:
-            rows: 5
+            rows: 5            
         broker_list:
           title: Broker List
           type: string
@@ -45,7 +53,7 @@ spec:
       name: Fetch Base
       action: fetch:template
       input:
-        url: ./node-consumer/src
+        url: ./content/node-consumer/src
         values:
           group_id: ${{ parameters.group_id }}
           broker_list: ${{ parameters.broker_list }}
@@ -56,7 +64,7 @@ spec:
       action: publish:github
       input:
         allowedHosts: ['github.com']
-        description: This is ${{ parameters.repoName }}
+        description: This is ${{ parameters.name }}
         repoUrl: ${{ parameters.repoUrl }}
 
     # The final step is to register our new component in the catalog.
@@ -65,4 +73,4 @@ spec:
       action: catalog:register
       input:
         repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
-        catalogInfoPath: '/node-consumer/catalog-info.yaml'
+        catalogInfoPath: '/catalog-info.yaml'

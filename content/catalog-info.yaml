@@ -1,9 +1,9 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: ${{ values.repoName | dump }}
+  name: ${{ values.name | dump }}
   description: A template for the scaffolder that creates a consumer service for a cluster.
 spec:
   type: service
-  owner: raman.online.com
+  owner: user:guest
   lifecycle: experimental

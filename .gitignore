@@ -1,4 +1,3 @@
-/node-consumer/node_modules
-/node_modules
+/content/node-consumer/node_modules
 /error.json
 /yaml.yaml
