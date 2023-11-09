@@ -55,6 +55,7 @@ spec:
       input:
         url: ./content
         values:
+          name: ${{ parameters.name }}
           group_id: ${{ parameters.group_id }}
           broker_list: ${{ parameters.broker_list }}
 
