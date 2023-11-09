@@ -1,0 +1,8 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Component
+metadata:
+  name: ${{ values.name | dump }}
+spec:
+  type: service
+  owner: user:guest
+  lifecycle: experimental
