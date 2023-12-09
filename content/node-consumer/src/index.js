@@ -1,43 +1,53 @@
-const Kafka = require('node-rdkafka');
 
-const consumer = new Kafka.KafkaConsumer({
-  'group.id': '${{ values.group_id }}',
-  'metadata.broker.list': '${{ values.broker_list }}', // Replace with your Redpanda broker list (e.g., 'redpanda:9092')
-});
+const { Kafka, logLevel } = require('kafkajs')
 
-consumer.connect();
+const kafka = new Kafka({
+    logLevel: logLevel.INFO,
+    brokers: '${{ values.broker_list }}'.split(',').map(((broker) => broker.trim())),
+    clientId: '${{ values.name }}'
+})
 
-consumer
-  .on('ready', function () {
-    console.log('Consumer is ready');
+const topic = 'your-topic'
+const consumer = kafka.consumer({ groupId: '${{ values.group_id }}' })
 
-    consumer.subscribe(['your-topic']); // Replace with the topic you want to subscribe to
+const run = async () => {
+    await consumer.connect()
+    await consumer.subscribe({ topic, fromBeginning: true })
+    await consumer.run({
+        // eachBatch: async ({ batch }) => {
+        //   console.log(batch)
+        // },
+        eachMessage: async ({ topic, partition, message }) => {
+            const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
+            console.log(`- ${prefix} ${message.key}#${message.value}`)
+        },
+    })
+}
 
-    consumer.consume();
-  })
-  .on('data', function (data) {
-    // Handle incoming messages
-    console.log('Received message:', data.value.toString());
-  })
-  .on('disconnected', function (arg) {
-    console.log('Consumer disconnected. ' + JSON.stringify(arg));
-  });
+run().catch(e => console.error(`[example/consumer] ${e.message}`, e))
 
-// Handle errors
-consumer.on('event.error', function (err) {
-  console.error('Error: ', err);
-});
+const errorTypes = ['unhandledRejection', 'uncaughtException']
+const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2']
 
-// Graceful shutdown
-process.on('SIGINT', function () {
-  console.log('Disconnecting consumer...');
-  consumer.disconnect();
-});
+errorTypes.forEach(type => {
+    process.on(type, async e => {
+        try {
+            console.log(`process.on ${type}`)
+            console.error(e)
+            await consumer.disconnect()
+            process.exit(0)
+        } catch (_) {
+            process.exit(1)
+        }
+    })
+})
 
-// Ensure the consumer disconnects on unhandled exceptions
-process.on('uncaughtException', function (err) {
-  console.error('Uncaught Exception: ', err);
-  console.log('Disconnecting consumer...');
-  consumer.disconnect();
-  process.exit(1);
-});
+signalTraps.forEach(type => {
+    process.once(type, async () => {
+        try {
+            await consumer.disconnect()
+        } finally {
+            process.kill(process.pid, type)
+        }
+    })
+})
